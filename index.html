@@ -71,15 +71,12 @@
     @keyframes tune{to{transform:scaleY(1)}}
   }
   header{text-align:center}
-  h1{
-    font-size:clamp(2.1rem,6vw,3.5rem);font-weight:700;letter-spacing:-.02em;line-height:1.08;
-    margin:2.6rem auto .7rem;
-    background:linear-gradient(100deg,#F2F5F8 0%,#9FB6EA 40%,#C596D6 70%,#F2C77A 100%);
-    -webkit-background-clip:text;background-clip:text;color:transparent;
+  .sr-only{
+    position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+    clip:rect(0,0,0,0);white-space:nowrap;border:0;
   }
-  .lede{margin:0 auto 1rem;color:var(--dim);max-width:46ch}
   .notice{
-    display:inline-block;margin:0 auto 2rem;color:var(--dim);font-size:.8rem;line-height:1.5;max-width:46ch;
+    display:inline-block;margin:2.4rem auto 2rem;color:var(--dim);font-size:.8rem;line-height:1.5;max-width:46ch;
     border:1px solid var(--line);border-radius:10px;padding:.7rem 1.1rem;background:var(--panel);
   }
   .notice a{color:inherit}
@@ -217,14 +214,13 @@
 
 <div class="hero-wrap">
   <div class="hero">
-    <img src="assets/banner.png" width="2172" height="724" alt="IPTV by Bahey — Your Entertainment Starts Here. Stream live TV, movies, series, sports and documentaries with any VLC-compatible player." loading="eager" fetchpriority="high" decoding="async">
+    <img src="assets/banner.png" width="2172" height="724" alt="IPTV Playlists — Your Entertainment Starts Here. All 1,200+ playlists published by iptv-org on one page. Click any row to copy its .m3u link, then paste it into VLC, Kodi, or any player that opens a network stream. Free live TV for everyone." loading="eager" fetchpriority="high" decoding="async">
   </div>
 </div>
 
 <div class="wrap glow">
   <header>
-    <h1>IPTV playlists</h1>
-    <p class="lede">All 1,270 playlists published by iptv-org, on one page. Click any row to copy its .m3u link, then paste it into VLC, Kodi or any player that opens a network stream.</p>
+    <h1 class="sr-only">IPTV playlists — all 1,270 playlists published by iptv-org, searchable on one page</h1>
     <p class="notice">This page indexes links already published by <a href="https://github.com/iptv-org/iptv" style="color:inherit">iptv-org/iptv</a> on GitHub. It hosts no streams and has no control over what the linked sources carry.</p>
 
     <div class="search">
