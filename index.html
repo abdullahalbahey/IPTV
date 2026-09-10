@@ -11,6 +11,15 @@
 <meta property="og:url" content="https://abdullahalbahey.github.io/IPTV/">
 <meta property="og:image" content="https://abdullahalbahey.github.io/IPTV/assets/banner.png">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="color-scheme" content="dark light">
+<script>
+(function(){
+  try{
+    var t = localStorage.getItem("iptv-theme");
+    if(t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+  }catch(e){}
+})();
+</script>
 <style>
   :root{
     --bg:#0F1720;
@@ -19,6 +28,8 @@
     --ink:#DDE5EC;
     --dim:#8C9CAC;
     --focus:#F2F5F8;
+    --hover-bg:#1E2C3C;
+    --hover-border:#33465C;
 
     --country:#4FC3D9;
     --subdivision:#6C8FD6;
@@ -32,9 +43,42 @@
     --sans:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --mono:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#F6F8FA;
+      --panel:#FFFFFF;
+      --line:#DCE3EA;
+      --ink:#141B22;
+      --dim:#55606B;
+      --focus:#0D1117;
+      --hover-bg:#EAF0F6;
+      --hover-border:#B9C4CF;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#F6F8FA;
+    --panel:#FFFFFF;
+    --line:#DCE3EA;
+    --ink:#141B22;
+    --dim:#55606B;
+    --focus:#0D1117;
+    --hover-bg:#EAF0F6;
+    --hover-border:#B9C4CF;
+  }
+  :root[data-theme="dark"]{
+    --bg:#0F1720;
+    --panel:#16212D;
+    --line:#243343;
+    --ink:#DDE5EC;
+    --dim:#8C9CAC;
+    --focus:#F2F5F8;
+    --hover-bg:#1E2C3C;
+    --hover-border:#33465C;
+  }
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
-  body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 var(--sans)}
+  body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 var(--sans);transition:background-color .15s ease,color .15s ease}
+  @media (prefers-reduced-motion: reduce){body{transition:none}}
   .wrap{max-width:64rem;margin:0 auto;padding:0 var(--pad) 5rem}
 
   /* Hero banner ------------------------------------------------ */
@@ -88,7 +132,7 @@
     box-shadow:0 10px 26px -16px rgba(0,0,0,.6);
   }
   #q::placeholder{color:var(--dim);font-weight:400}
-  #q:hover{border-color:#33465C}
+  #q:hover{border-color:var(--hover-border)}
   #q:focus{outline:2px solid var(--country);outline-offset:2px;border-color:transparent}
   .slash{
     position:absolute;right:.85rem;top:50%;transform:translateY(-50%);color:var(--dim);
@@ -101,7 +145,7 @@
     background:var(--panel);border:1px solid var(--line);border-radius:999px;color:var(--dim);
     cursor:pointer;font:500 .82rem/1 var(--sans);padding:.48rem .9rem;transition:color .15s ease,border-color .15s ease,background .15s ease;
   }
-  .chip:hover{color:var(--ink);border-color:#33465C}
+  .chip:hover{color:var(--ink);border-color:var(--hover-border)}
   .chip:focus-visible{outline:2px solid var(--country);outline-offset:2px}
   .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg);font-weight:600}
   .status{color:var(--dim);font-size:.85rem;margin:1.1rem 0 0;min-height:1.2em}
@@ -132,7 +176,7 @@
     padding:.72rem .8rem .72rem .95rem;transition:background .12s ease;
   }
   .group>.row:last-child,.group>.branch:last-child .row:last-child{border-bottom:0}
-  .row:hover{background:#1E2C3C}
+  .row:hover{background:var(--hover-bg)}
   .row:focus-visible{outline:2px solid var(--country);outline-offset:-2px}
   .row .name{flex:1 1 auto;min-width:0}
   .row .parent{color:var(--dim);font-size:.82rem;display:block}
@@ -142,7 +186,7 @@
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:42%;
   }
   .row:hover .file,.row:focus-visible .file{color:var(--ink)}
-  .row.copied{background:#1E2C3C}
+  .row.copied{background:var(--hover-bg)}
   .row.copied .file{color:var(--region)}
   @media (max-width:640px){.row .file{display:none}}
   .depth1{padding-left:2.2rem}
@@ -161,7 +205,7 @@
     border-left:3px solid var(--country);color:var(--dim);cursor:pointer;
     font:400 .9rem/1 var(--mono);
   }
-  .expand:hover{color:var(--ink);background:#1E2C3C}
+  .expand:hover{color:var(--ink);background:var(--hover-bg)}
   .expand:focus-visible{outline:2px solid var(--country);outline-offset:-2px}
   .branch .expand + .row{flex:1 1 0;width:auto;border-left:0;padding-left:0}
 
@@ -200,6 +244,21 @@
   #backToTop:focus-visible{outline:2px solid var(--country);outline-offset:2px}
   #backToTop svg{flex:0 0 auto}
   @media (prefers-reduced-motion: reduce){#backToTop{transition:none}}
+
+  #themeToggle{display:inline-flex;align-items:center;gap:.35rem}
+  #themeToggle svg{flex:0 0 auto}
+  #themeToggle .icon-sun,
+  #themeToggle .label-light{display:none}
+  :root[data-theme="light"] #themeToggle .icon-sun,
+  :root[data-theme="light"] #themeToggle .label-light{display:inline}
+  :root[data-theme="light"] #themeToggle .icon-moon,
+  :root[data-theme="light"] #themeToggle .label-dark{display:none}
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]) #themeToggle .icon-sun,
+    :root:not([data-theme="dark"]) #themeToggle .label-light{display:inline}
+    :root:not([data-theme="dark"]) #themeToggle .icon-moon,
+    :root:not([data-theme="dark"]) #themeToggle .label-dark{display:none}
+  }
 </style>
 </head>
 <body>
@@ -225,6 +284,11 @@
     <div class="filters" id="filters" role="group" aria-label="Filter by playlist type">
       <a class="chip" href="guide.html" style="display:inline-block;text-decoration:none">📺 Live TV Guide</a>
       <a class="chip" href="#how-to-watch" style="display:inline-block;text-decoration:none">How to watch (VLC) ↓</a>
+      <button id="themeToggle" class="chip" type="button" aria-label="Toggle light/dark theme">
+        <svg class="icon-sun" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="icon-moon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <span class="label-light">Light</span><span class="label-dark">Dark</span>
+      </button>
     </div>
     <p class="status" id="status"></p>
   </header>
@@ -490,6 +554,18 @@ var DATA = {"idx":[["All channels","index.m3u"],["All channels, grouped by categ
       q.value = "";
       render();
     }
+  });
+
+  var themeToggle = document.getElementById("themeToggle");
+  themeToggle.addEventListener("click", function(){
+    var root = document.documentElement;
+    var current = root.getAttribute("data-theme");
+    if(!current){
+      current = (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) ? "light" : "dark";
+    }
+    var next = current === "light" ? "dark" : "light";
+    root.setAttribute("data-theme", next);
+    try{ localStorage.setItem("iptv-theme", next); }catch(e){}
   });
 
   var backToTop = document.getElementById("backToTop");
