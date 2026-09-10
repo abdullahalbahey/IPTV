@@ -38,7 +38,13 @@
   .wrap{max-width:64rem;margin:0 auto;padding:0 var(--pad) 5rem}
 
   /* Hero banner ------------------------------------------------ */
-  .hero{display:block;width:100%;height:auto;background:#060a12}
+  .hero-wrap{max-width:64rem;margin:0 auto;padding:1.4rem var(--pad) 0}
+  .hero{
+    display:block;width:100%;height:20vh;max-height:210px;min-height:96px;
+    overflow:hidden;border-radius:14px;background:#060a12;
+    box-shadow:0 16px 34px -20px rgba(0,0,0,.7);
+  }
+  .hero img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 38%}
   .glow{
     background:
       radial-gradient(60rem 22rem at 15% -10%, rgba(108,143,214,.16), transparent 60%),
@@ -70,33 +76,44 @@
 
   /* Search --------------------------------------------------- */
   .search{position:relative}
+  .search svg{
+    position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--dim);
+    pointer-events:none;
+  }
   #q{
-    width:100%;background:var(--panel);border:1px solid var(--line);border-radius:2px;
-    color:var(--ink);font:500 1.05rem/1 var(--sans);padding:1rem 3.4rem 1rem 1rem;
-    -webkit-appearance:none;appearance:none;
+    width:100%;background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    color:var(--ink);font:500 1.05rem/1 var(--sans);padding:1.05rem 3.6rem 1.05rem 2.8rem;
+    -webkit-appearance:none;appearance:none;transition:border-color .15s ease,background .15s ease;
   }
   #q::placeholder{color:var(--dim);font-weight:400}
+  #q:hover{border-color:#33465C}
   #q:focus{outline:2px solid var(--country);outline-offset:2px;border-color:transparent}
   .slash{
     position:absolute;right:.85rem;top:50%;transform:translateY(-50%);color:var(--dim);
-    border:1px solid var(--line);border-radius:2px;font:400 .75rem/1 var(--mono);padding:.3rem .45rem;
+    border:1px solid var(--line);border-radius:5px;font:400 .75rem/1 var(--mono);padding:.3rem .45rem;
   }
-  @media (max-width:520px){.slash{display:none}#q{padding-right:1rem}}
+  @media (max-width:520px){.slash{display:none}#q{padding-right:1.2rem}}
 
-  .filters{display:flex;flex-wrap:wrap;gap:.4rem;margin:.9rem 0 .4rem}
+  .filters{display:flex;flex-wrap:wrap;gap:.45rem;margin:1rem 0 .4rem}
   .chip{
-    background:none;border:1px solid var(--line);border-radius:999px;color:var(--dim);
-    cursor:pointer;font:400 .82rem/1 var(--sans);padding:.42rem .8rem;
+    background:var(--panel);border:1px solid var(--line);border-radius:999px;color:var(--dim);
+    cursor:pointer;font:500 .82rem/1 var(--sans);padding:.48rem .9rem;transition:color .15s ease,border-color .15s ease,background .15s ease;
   }
-  .chip:hover{color:var(--ink)}
+  .chip:hover{color:var(--ink);border-color:#33465C}
   .chip:focus-visible{outline:2px solid var(--country);outline-offset:2px}
-  .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg);font-weight:500}
-  .status{color:var(--dim);font-size:.85rem;margin:.9rem 0 0;min-height:1.2em}
+  .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg);font-weight:600}
+  .status{color:var(--dim);font-size:.85rem;margin:1.1rem 0 0;min-height:1.2em}
 
   /* Results -------------------------------------------------- */
-  .group{margin:2.6rem 0 0}
-  .ghead{display:flex;align-items:baseline;gap:1rem;border-bottom:1px solid var(--line);padding-bottom:.5rem;margin-bottom:.5rem}
-  .ghead h2{font-size:.95rem;font-weight:600;margin:0;flex:1 1 auto}
+  .group{
+    margin:1.4rem 0 0;background:var(--panel);border:1px solid var(--line);
+    border-radius:12px;overflow:hidden;
+  }
+  .ghead{
+    display:flex;align-items:baseline;gap:1rem;padding:1rem 1.1rem .8rem;
+    border-bottom:1px solid var(--line);
+  }
+  .ghead h2{font-size:.78rem;font-weight:700;margin:0;flex:1 1 auto;letter-spacing:.04em;text-transform:uppercase;color:var(--dim)}
   .ghead button{
     background:none;border:0;color:var(--dim);cursor:pointer;font:400 .82rem/1 var(--sans);padding:.25rem 0;
     border-bottom:1px solid var(--line);
@@ -108,11 +125,12 @@
   .row{
     display:flex;align-items:baseline;gap:.7rem;flex:1 1 auto;width:100%;
     background:none;border:0;border-bottom:1px solid var(--line);
-    border-left:3px solid var(--tick,var(--line));
+    border-left:3px solid var(--tick,transparent);
     color:inherit;cursor:pointer;text-align:left;font:inherit;
-    padding:.62rem .6rem .62rem .8rem;
+    padding:.72rem .8rem .72rem .95rem;transition:background .12s ease;
   }
-  .row:hover{background:var(--panel)}
+  .group>.row:last-child,.group>.branch:last-child .row:last-child{border-bottom:0}
+  .row:hover{background:#1E2C3C}
   .row:focus-visible{outline:2px solid var(--country);outline-offset:-2px}
   .row .name{flex:1 1 auto;min-width:0}
   .row .parent{color:var(--dim);font-size:.82rem;display:block}
@@ -122,7 +140,7 @@
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:42%;
   }
   .row:hover .file,.row:focus-visible .file{color:var(--ink)}
-  .row.copied{background:var(--panel)}
+  .row.copied{background:#1E2C3C}
   .row.copied .file{color:var(--region)}
   @media (max-width:640px){.row .file{display:none}}
   .depth1{padding-left:2.2rem}
@@ -141,7 +159,7 @@
     border-left:3px solid var(--country);color:var(--dim);cursor:pointer;
     font:400 .9rem/1 var(--mono);
   }
-  .expand:hover{color:var(--ink);background:var(--panel)}
+  .expand:hover{color:var(--ink);background:#1E2C3C}
   .expand:focus-visible{outline:2px solid var(--country);outline-offset:-2px}
   .branch .expand + .row{flex:1 1 0;width:auto;border-left:0;padding-left:0}
 
@@ -184,9 +202,13 @@
 </head>
 <body>
 
-<img class="hero" src="assets/banner.png" width="2172" height="724" alt="IPTV by Bahey — Your Entertainment Starts Here. Stream live TV, movies, series, sports and documentaries with any VLC-compatible player." loading="eager" fetchpriority="high" decoding="async">
-
 <div class="bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+<div class="hero-wrap">
+  <div class="hero">
+    <img src="assets/banner.png" width="2172" height="724" alt="IPTV by Bahey — Your Entertainment Starts Here. Stream live TV, movies, series, sports and documentaries with any VLC-compatible player." loading="eager" fetchpriority="high" decoding="async">
+  </div>
+</div>
 
 <div class="wrap glow">
   <header>
@@ -194,6 +216,7 @@
     <p class="lede">All 1,270 playlists published by iptv-org, on one page. Click any row to copy its .m3u link, then paste it into VLC, Kodi or any player that opens a network stream.</p>
 
     <div class="search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
       <input id="q" type="search" placeholder="Search a category, language, country or city" autocomplete="off" spellcheck="false" aria-label="Search playlists">
       <span class="slash" aria-hidden="true">/</span>
     </div>
