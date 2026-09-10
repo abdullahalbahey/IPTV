@@ -25,6 +25,7 @@
     --country:#4FC3D9;
     --live:#71BF8E;
     --error:#E08A8A;
+    --hover-bg:#1E2C3C;
     --pad:clamp(1rem, 4vw, 2.5rem);
     --sans:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --mono:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -38,6 +39,7 @@
       --dim:#55606B;
       --focus:#0D1117;
       --error:#B23B3B;
+      --hover-bg:#EAF0F6;
     }
   }
   :root[data-theme="light"]{
@@ -48,6 +50,7 @@
     --dim:#55606B;
     --focus:#0D1117;
     --error:#B23B3B;
+    --hover-bg:#EAF0F6;
   }
   :root[data-theme="dark"]{
     --bg:#0F1720;
@@ -57,6 +60,7 @@
     --dim:#8C9CAC;
     --focus:#F2F5F8;
     --error:#E08A8A;
+    --hover-bg:#1E2C3C;
   }
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
@@ -115,9 +119,20 @@
 
   .group{margin:1.4rem 0 0;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
   .ghead{
-    display:flex;align-items:baseline;gap:1rem;padding:.85rem 1.1rem;border-bottom:1px solid var(--line);
-    font-size:.78rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--dim);text-align:left;
+    display:flex;align-items:center;gap:.8rem;width:100%;padding:.9rem 1.1rem;
+    background:none;border:0;border-bottom:1px solid var(--line);color:inherit;font:inherit;
+    text-align:left;cursor:pointer;
   }
+  .ghead[aria-expanded="false"]{border-bottom:0}
+  .ghead:hover{background:var(--hover-bg)}
+  .ghead:focus-visible{outline:2px solid var(--country);outline-offset:-2px}
+  .chan-name{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;color:var(--ink)}
+  .chan-sub{color:var(--dim);font-weight:400;font-size:.82rem;margin-left:.5rem}
+  .chan-meta{flex:0 0 auto;color:var(--dim);font-size:.8rem;white-space:nowrap}
+  .chan-meta .live-dot{color:var(--live);font-weight:600}
+  .chevron{flex:0 0 auto;color:var(--dim);transition:transform .15s ease}
+  @media (prefers-reduced-motion: reduce){.chevron{transition:none}}
+  .ghead[aria-expanded="true"] .chevron{transform:rotate(180deg)}
   .row{
     display:flex;align-items:center;gap:.9rem;border-bottom:1px solid var(--line);padding:.75rem 1.1rem;text-align:left;
   }
@@ -232,6 +247,7 @@
 
   var allEpisodes = [];
   var loaded = false;
+  var expandedChannels = {};
 
   function esc(s){
     return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
@@ -267,6 +283,24 @@
   function countryOf(item){
     var n = outlet(item);
     return n && n.country ? n.country : null;
+  }
+
+  /** A stable, globally-unique id per channel - TVMaze network and webChannel ids are
+   * each unique within their own type, so two differently-run stations that happen to
+   * share a display name (common across countries) never collapse into one group. */
+  function channelKey(item){
+    var show = showOf(item);
+    var net = show && show.network;
+    var web = show && show.webChannel;
+    if (net && net.id != null) return "n" + net.id;
+    if (web && web.id != null) return "w" + web.id;
+    return "u" + networkName(item);
+  }
+
+  function flagOf(code){
+    if (!code || code.length !== 2) return "";
+    var cps = code.toUpperCase().split("").map(function(c){ return 0x1F1E6 + (c.charCodeAt(0) - 65); });
+    return String.fromCodePoint.apply(null, cps);
   }
 
   /** Only keep airings with a real show name, a real network/channel name, and a
@@ -318,6 +352,7 @@
 
     var needle = fold(q.value.trim());
     var countryCode = countrySel.value;
+    var searching = !!needle;
 
     var filtered = allEpisodes.filter(function(item){
       if (!isUsable(item)) return false;
@@ -335,51 +370,76 @@
       return;
     }
 
-    var byNetwork = {};
+    // Group by channel identity (network/webChannel id), not just display name - two
+    // unrelated stations in different countries can share a name, and lumping them
+    // together under one heading was exactly the "repeating, ungrouped" mess reported.
+    var byChannel = {};
     var order = [];
     filtered.forEach(function(item){
-      var key = networkName(item);
-      if (!byNetwork[key]) { byNetwork[key] = []; order.push(key); }
-      byNetwork[key].push(item);
+      var key = channelKey(item);
+      if (!byChannel[key]) {
+        var c = countryOf(item);
+        byChannel[key] = { name: networkName(item), countryName: c ? c.name : "", flag: flagOf(c && c.code), items: [] };
+        order.push(key);
+      }
+      byChannel[key].items.push(item);
     });
 
-    // Prioritize live: networks with something airing right now sort first, then alphabetically.
+    // Prioritize live: channels with something airing right now sort first, then alphabetically.
     order.sort(function(a, b){
-      var aLive = byNetwork[a].some(function(it){ var s = airingStatus(it); return s && s.isLive; });
-      var bLive = byNetwork[b].some(function(it){ var s = airingStatus(it); return s && s.isLive; });
+      var aLive = byChannel[a].items.some(function(it){ var s = airingStatus(it); return s && s.isLive; });
+      var bLive = byChannel[b].items.some(function(it){ var s = airingStatus(it); return s && s.isLive; });
       if (aLive !== bLive) return aLive ? -1 : 1;
-      return a.localeCompare(b);
+      return byChannel[a].name.localeCompare(byChannel[b].name);
     });
 
     var html = "";
     order.forEach(function(key){
-      var items = byNetwork[key].slice().sort(function(a, b){
+      var chan = byChannel[key];
+      var items = chan.items.slice().sort(function(a, b){
         var sa = airingStatus(a), sb = airingStatus(b);
         var aLive = !!(sa && sa.isLive), bLive = !!(sb && sb.isLive);
         if (aLive !== bLive) return aLive ? -1 : 1;
         return new Date(a.airstamp) - new Date(b.airstamp);
       });
-      html += '<section class="group"><div class="ghead">' + esc(key) + '</div>';
-      items.forEach(function(item){
-        var status = airingStatus(item);
-        var show = showOf(item);
-        var img = show && show.image && (show.image.medium || show.image.original);
-        var when = status
-          ? (status.isLive ? "Started " + formatTime(status.start) : "Airs " + formatTime(status.start))
-          : "Time unknown";
-        var badge = status && status.isLive
-          ? '<span class="badge live">Live now</span>'
-          : '<span class="badge upcoming">' + esc(when.replace(/^(Started|Airs) /, "")) + '</span>';
-        html +=
-          '<div class="row">' +
-            (img ? '<img class="thumb" src="' + esc(img) + '" alt="" loading="lazy">' : '<div class="thumb" aria-hidden="true"></div>') +
-            '<div class="info">' +
-              '<div class="show">' + esc(showName(item)) + '</div>' +
-              '<div class="when">' + esc(when) + '</div>' +
-            '</div>' +
-            badge +
-          '</div>';
-      });
+      var liveCount = items.filter(function(it){ var s = airingStatus(it); return s && s.isLive; }).length;
+      // Collapsed by default so a channel with a full day of programs doesn't dump
+      // dozens of rows on the page at once - a search auto-expands its matches.
+      var isOpen = searching || !!expandedChannels[key];
+
+      html += '<section class="group">' +
+        '<button type="button" class="ghead" data-toggle="' + esc(key) + '" aria-expanded="' + (isOpen ? "true" : "false") + '" aria-label="' + (isOpen ? "Hide" : "Show") + ' programs for ' + esc(chan.name) + '">' +
+          '<span class="chan-name">' + (chan.flag ? chan.flag + " " : "") + esc(chan.name) +
+            (chan.countryName ? '<span class="chan-sub">' + esc(chan.countryName) + '</span>' : "") +
+          '</span>' +
+          '<span class="chan-meta">' + items.length + (items.length === 1 ? " program" : " programs") +
+            (liveCount ? ' &middot; <span class="live-dot">' + liveCount + ' live</span>' : "") +
+          '</span>' +
+          '<svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>' +
+        '</button>';
+
+      if (isOpen) {
+        items.forEach(function(item){
+          var status = airingStatus(item);
+          var show = showOf(item);
+          var img = show && show.image && (show.image.medium || show.image.original);
+          var when = status
+            ? (status.isLive ? "Started " + formatTime(status.start) : "Airs " + formatTime(status.start))
+            : "Time unknown";
+          var badge = status && status.isLive
+            ? '<span class="badge live">Live now</span>'
+            : '<span class="badge upcoming">' + esc(when.replace(/^(Started|Airs) /, "")) + '</span>';
+          html +=
+            '<div class="row">' +
+              (img ? '<img class="thumb" src="' + esc(img) + '" alt="" loading="lazy">' : '<div class="thumb" aria-hidden="true"></div>') +
+              '<div class="info">' +
+                '<div class="show">' + esc(showName(item)) + '</div>' +
+                '<div class="when">' + esc(when) + '</div>' +
+              '</div>' +
+              badge +
+            '</div>';
+        });
+      }
       html += '</section>';
     });
     out.innerHTML = html;
@@ -417,6 +477,16 @@
         );
       });
   }
+
+  out.addEventListener("click", function(e){
+    var btn = e.target.closest("[data-toggle]");
+    if (!btn) return;
+    var key = btn.getAttribute("data-toggle");
+    expandedChannels[key] = !expandedChannels[key];
+    render();
+    var next = out.querySelector('[data-toggle="' + key.replace(/"/g, '\\"') + '"]');
+    if (next) next.focus();
+  });
 
   q.addEventListener("input", render);
   countrySel.addEventListener("change", render);
