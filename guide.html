@@ -166,18 +166,37 @@
     return String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   }
 
+  /** /schedule/full nests the show under _embedded.show rather than a top-level
+   * "show" field like the per-country /schedule endpoint does - check both. */
+  function showOf(item){
+    return item.show || (item._embedded && item._embedded.show) || null;
+  }
+
   function outlet(item){
-    return (item.show && (item.show.network || item.show.webChannel)) || null;
+    var show = showOf(item);
+    return (show && (show.network || show.webChannel)) || null;
   }
 
   function networkName(item){
     var n = outlet(item);
-    return n && n.name ? n.name : "Unknown network";
+    return n && n.name ? n.name : "";
+  }
+
+  function showName(item){
+    var s = showOf(item);
+    return s && s.name ? s.name : "";
   }
 
   function countryOf(item){
     var n = outlet(item);
     return n && n.country ? n.country : null;
+  }
+
+  /** Only keep airings with a real show name, a real network/channel name, and a
+   * parseable airtime - drop anything TVMaze itself only half-populated rather than
+   * render a placeholder like "Untitled" or "Unknown network". */
+  function isUsable(item){
+    return !!(showName(item) && networkName(item) && item.airstamp && !isNaN(new Date(item.airstamp).getTime()));
   }
 
   function formatTime(date){
@@ -201,15 +220,16 @@
   /** Builds the country dropdown from whatever countries are actually present in the
    * fetched data - never a guessed list, so it can never offer a country with no data. */
   function populateCountries(){
+    var usable = allEpisodes.filter(isUsable);
     var byCode = {};
-    allEpisodes.forEach(function(item){
+    usable.forEach(function(item){
       var c = countryOf(item);
       if (c && c.code && !byCode[c.code]) byCode[c.code] = c.name || c.code;
     });
     var codes = Object.keys(byCode).sort(function(a, b){
       return byCode[a].localeCompare(byCode[b]);
     });
-    countrySel.innerHTML = '<option value="">All countries (' + allEpisodes.length.toLocaleString() + ' airings)</option>' +
+    countrySel.innerHTML = '<option value="">All countries (' + usable.length.toLocaleString() + ' airings)</option>' +
       codes.map(function(code){
         return '<option value="' + esc(code) + '">' + esc(byCode[code]) + '</option>';
       }).join("");
@@ -223,12 +243,13 @@
     var countryCode = countrySel.value;
 
     var filtered = allEpisodes.filter(function(item){
+      if (!isUsable(item)) return false;
       if (countryCode) {
         var c = countryOf(item);
         if (!c || c.code !== countryCode) return false;
       }
       if (!needle) return true;
-      var haystack = fold((item.show ? item.show.name : "") + " " + networkName(item));
+      var haystack = fold(showName(item) + " " + networkName(item));
       return haystack.indexOf(needle) > -1;
     });
 
@@ -264,7 +285,8 @@
       html += '<section class="group"><div class="ghead">' + esc(key) + '</div>';
       items.forEach(function(item){
         var status = airingStatus(item);
-        var img = item.show && item.show.image && (item.show.image.medium || item.show.image.original);
+        var show = showOf(item);
+        var img = show && show.image && (show.image.medium || show.image.original);
         var when = status
           ? (status.isLive ? "Started " + formatTime(status.start) : "Airs " + formatTime(status.start))
           : "Time unknown";
@@ -275,7 +297,7 @@
           '<div class="row">' +
             (img ? '<img class="thumb" src="' + esc(img) + '" alt="" loading="lazy">' : '<div class="thumb" aria-hidden="true"></div>') +
             '<div class="info">' +
-              '<div class="show">' + esc(item.show ? item.show.name : "Untitled") + '</div>' +
+              '<div class="show">' + esc(showName(item)) + '</div>' +
               '<div class="when">' + esc(when) + '</div>' +
             '</div>' +
             badge +
@@ -303,11 +325,12 @@
         allEpisodes = Array.isArray(data) ? data : [];
         loaded = true;
         populateCountries();
-        var liveCount = allEpisodes.filter(function(it){ var s = airingStatus(it); return s && s.isLive; }).length;
-        metaEl.textContent = allEpisodes.length
-          ? allEpisodes.length.toLocaleString() + " airings across " + (countrySel.options.length - 1) +
+        var usable = allEpisodes.filter(isUsable);
+        var liveCount = usable.filter(function(it){ var s = airingStatus(it); return s && s.isLive; }).length;
+        metaEl.textContent = usable.length
+          ? usable.length.toLocaleString() + " airings across " + (countrySel.options.length - 1) +
             " countries, " + liveCount.toLocaleString() + " live right now. Fetched just now - refresh for the latest."
-          : "TVMaze returned no data.";
+          : "TVMaze returned data, but none of it had enough detail (show name, network, and airtime) to display.";
         render();
       })
       .catch(function(err){
