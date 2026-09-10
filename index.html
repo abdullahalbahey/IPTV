@@ -134,7 +134,7 @@
   .empty b{color:var(--ink);font-weight:500}
 
   /* Static section ------------------------------------------- */
-  .patterns{margin-top:3.5rem;border-top:1px solid var(--line);padding-top:1.6rem}
+  .patterns{margin-top:3.5rem;border-top:1px solid var(--line);padding-top:1.6rem;scroll-margin-top:1.5rem}
   .patterns h2{font-size:.95rem;font-weight:600;margin:0 0 .3rem}
   .patterns p{color:var(--dim);font-size:.88rem;margin:0 0 1.1rem;max-width:60ch}
   .patterns ol{color:var(--dim);font-size:.88rem;margin:0 0 1.1rem;padding-left:1.2rem;max-width:60ch}
@@ -167,13 +167,15 @@
       <span class="slash" aria-hidden="true">/</span>
     </div>
 
-    <div class="filters" id="filters" role="group" aria-label="Filter by playlist type"></div>
+    <div class="filters" id="filters" role="group" aria-label="Filter by playlist type">
+      <a class="chip" href="#how-to-watch" style="display:inline-block;text-decoration:none">How to watch (VLC) ↓</a>
+    </div>
     <p class="status" id="status"></p>
   </header>
 
   <main id="out"></main>
 
-  <section class="patterns">
+  <section class="patterns" id="how-to-watch">
     <h2>How to watch with VLC</h2>
     <ol>
       <li>Click any playlist row above. Its <code>.m3u</code> link is copied to your clipboard, no need to select or type anything.</li>
@@ -183,13 +185,6 @@
       <li>Streams can take a few seconds to buffer, and some channels go offline without notice since iptv-org only indexes links, it doesn't host them. If one won't load, close it and try another from the same list.</li>
     </ol>
     <p>The same links work the same way in Kodi (add as an M3U source under PVR/IPTV Simple Client), and in most other IPTV apps that accept a playlist URL, such as Perfect Player or TiviMate.</p>
-  </section>
-
-  <section class="patterns">
-    <h2>Build your own link</h2>
-    <p>Two playlists take a filename instead of a name. Swap in any file from the streams folder of the iptv-org repository.</p>
-    <p><code>https://iptv-org.github.io/iptv/sources/&lt;FILENAME&gt;.m3u</code><br>
-       <code>https://iptv-org.github.io/iptv/raw/&lt;FILENAME&gt;.m3u</code> for the unfiltered, unsorted version.</p>
   </section>
 
   <footer>
