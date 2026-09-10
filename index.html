@@ -70,11 +70,17 @@
     .bars span:nth-child(7){animation-delay:.3s}
     @keyframes tune{to{transform:scaleY(1)}}
   }
-  h1{font-size:clamp(1.9rem,5vw,2.9rem);font-weight:600;letter-spacing:-.02em;line-height:1.1;margin:2.2rem 0 .5rem}
-  .lede{margin:0 0 1.8rem;color:var(--dim);max-width:48ch}
+  header{text-align:center}
+  h1{
+    font-size:clamp(2.1rem,6vw,3.5rem);font-weight:700;letter-spacing:-.02em;line-height:1.08;
+    margin:2.6rem auto .7rem;
+    background:linear-gradient(100deg,#F2F5F8 0%,#9FB6EA 40%,#C596D6 70%,#F2C77A 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .lede{margin:0 auto 2rem;color:var(--dim);max-width:46ch}
 
   /* Search --------------------------------------------------- */
-  .search{position:relative}
+  .search{position:relative;max-width:34rem;margin:0 auto;text-align:left}
   .search svg{
     position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--dim);
     pointer-events:none;
@@ -82,7 +88,8 @@
   #q{
     width:100%;background:var(--panel);border:1px solid var(--line);border-radius:10px;
     color:var(--ink);font:500 1.05rem/1 var(--sans);padding:1.05rem 3.6rem 1.05rem 2.8rem;
-    -webkit-appearance:none;appearance:none;transition:border-color .15s ease,background .15s ease;
+    -webkit-appearance:none;appearance:none;transition:border-color .15s ease,background .15s ease,box-shadow .15s ease;
+    box-shadow:0 10px 26px -16px rgba(0,0,0,.6);
   }
   #q::placeholder{color:var(--dim);font-weight:400}
   #q:hover{border-color:#33465C}
@@ -93,7 +100,7 @@
   }
   @media (max-width:520px){.slash{display:none}#q{padding-right:1.2rem}}
 
-  .filters{display:flex;flex-wrap:wrap;gap:.45rem;margin:1rem 0 .4rem}
+  .filters{display:flex;flex-wrap:wrap;justify-content:center;gap:.45rem;margin:1.1rem auto .4rem;max-width:40rem}
   .chip{
     background:var(--panel);border:1px solid var(--line);border-radius:999px;color:var(--dim);
     cursor:pointer;font:500 .82rem/1 var(--sans);padding:.48rem .9rem;transition:color .15s ease,border-color .15s ease,background .15s ease;
